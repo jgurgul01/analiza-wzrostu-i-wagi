@@ -1,0 +1,20 @@
+Analiza Danych Wzrostu i Wagi
+Cel Projektu
+Celem tego projektu jest analiza danych dotyczących wzrostu i wagi osób w celu zidentyfikowania wzorców w tych danych. Projekt obejmuje eksploracyjną analizę danych (EDA), modelowanie regresji liniowej i wielomianowej oraz wizualizację wyników. Analiza ma na celu zrozumienie, jak wzrost i waga są ze sobą powiązane oraz jakie wnioski można wyciągnąć z tych danych.
+Zastosowane Techniki Analizy
+1.Eksploracyjna Analiza Danych (EDA)**:
+   - Wczytanie danych i podstawowa eksploracja.
+   - Wizualizacja rozkładu wzrostu i wagi.
+   - Analiza korelacji między wzrostem a wagą.
+2. Modelowanie Regresji:
+   - Regresja Liniowa: Użyta do przewidywania wzrostu na podstawie wagi.
+   - Regresja Wielomianowa: Użyta do lepszego dopasowania danych, analizując nieliniowe zależności.
+3. Wizualizacja Wyników:
+   - Tworzenie wykresów rozkładu wzrostu i wagi.
+   - Wizualizacja linii regresji oraz dopasowania modelu wielomianowego.
+Wyniki i Wnioski
+- rozkład Wzrostu:
+ -rozkład Wagi:
+
+
+-

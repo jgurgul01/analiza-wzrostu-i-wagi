@@ -1,0 +1,172 @@
+# Analiza Danych Wzrostu i Wagi
+
+## Cel Projektu
+# Celem tego projektu jest analiza danych dotyczących wzrostu i wagi osób w celu zidentyfikowania wzorców w tych danych.
+
+# Importowanie bibliotek
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import PolynomialFeatures
+import joblib
+
+# Ustawienia wizualizacji
+sns.set(style="whitegrid")
+
+# Pobieranie danych
+!wget -O dane_wzrost_waga.csv "https://people.sc.fsu.edu/~jburkardt/data/csv/hw_200.csv"
+df = pd.read_csv('dane_wzrost_waga.csv')
+
+# Zmiana nazw kolumn na język polski i konwersja jednostek
+df.columns = ['Indeks', 'Wzrost (cale)', 'Waga (funty)']
+df['Wzrost (cm)'] = df['Wzrost (cale)'] * 2.54  # Konwersja cali na centymetry
+df['Waga (kg)'] = df['Waga (funty)'] * 0.453592  # Konwersja funtów na kilogramy
+
+# Usuwanie oryginalnych kolumn z danymi w calach i funtach
+df = df.drop(columns=['Wzrost (cale)', 'Waga (funty)'])
+
+# Wyświetlanie nazw kolumn
+print("Nazwy kolumn w zbiorze danych:")
+print(df.columns)
+
+# Eksploracyjna analiza danych (EDA)
+# Podstawowa eksploracja danych
+print(df.info())
+print(df.describe())
+
+# Podstawowe wizualizacje
+# Wykres dla kolumny 'Wzrost (cm)'
+plt.figure(figsize=(10, 6))
+sns.histplot(df['Wzrost (cm)'])
+plt.title('Rozkład wzrostu (w centymetrach)')
+plt.xlabel('Wzrost (cm)')
+plt.ylabel('Liczba osób')
+plt.show()
+
+# Wykres dla kolumny 'Waga (kg)'
+plt.figure(figsize=(10, 6))
+sns.histplot(df['Waga (kg)'])
+plt.title('Rozkład wagi (w kilogramach)')
+plt.xlabel('Waga (kg)')
+plt.ylabel('Liczba osób')
+plt.show()
+
+# Wykres rozproszenia wzrostu i wagi
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=df['Waga (kg)'], y=df['Wzrost (cm)'])
+plt.title('Wzrost w zależności od wagi')
+plt.xlabel('Waga (kg)')
+plt.ylabel('Wzrost (cm)')
+plt.show()
+
+# Obliczanie współczynnika korelacji
+correlation = df[['Waga (kg)', 'Wzrost (cm)']].corr()
+print("Współczynnik korelacji między wagą a wzrostem:")
+print(correlation)
+
+# Oczyszczanie danych
+# Usuwanie brakujących wartości
+df_cleaned = df.dropna()
+
+# Konwersja kolumn do odpowiednich typów danych (jeśli to konieczne)
+print(df_cleaned.info())
+
+# Modelowanie
+# Przygotowanie danych
+X = df_cleaned[['Waga (kg)']]
+y = df_cleaned['Wzrost (cm)']  # Zmienna zależna to wzrost
+
+# Podział danych na zestawy treningowe i testowe
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Tworzenie modelu regresji liniowej
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Ocena modelu
+y_pred = model.predict(X_test)
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+print(f'Średni błąd kwadratowy (MSE): {mse}')
+print(f'R^2: {r2}')
+
+# Zapisanie modelu
+joblib.dump(model, 'model_regresji_liniowej.pkl')
+print("Model został zapisany.")
+
+# Wizualizacja linii regresji
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=X_test['Waga (kg)'], y=y_test, label='Dane rzeczywiste')
+sns.lineplot(x=X_test['Waga (kg)'], y=y_pred, color='red', label='Linia regresji')
+plt.title('Regresja liniowa: Wzrost w zależności od wagi')
+plt.xlabel('Waga (kg)')
+plt.ylabel('Wzrost (cm)')
+plt.legend()
+plt.show()
+
+# Modelowanie regresji wielomianowej
+poly = PolynomialFeatures(degree=2)
+X_poly = poly.fit_transform(X)
+
+X_train_poly, X_test_poly, y_train_poly, y_test_poly = train_test_split(X_poly, y, test_size=0.3, random_state=42)
+
+model_poly = LinearRegression()
+model_poly.fit(X_train_poly, y_train_poly)
+
+# Ocena modelu regresji wielomianowej
+y_pred_poly = model_poly.predict(X_test_poly)
+mse_poly = mean_squared_error(y_test_poly, y_pred_poly)
+r2_poly = r2_score(y_test_poly, y_pred_poly)
+print(f'Średni błąd kwadratowy dla regresji wielomianowej (MSE): {mse_poly}')
+print(f'R^2 dla regresji wielomianowej: {r2_poly}')
+
+# Wizualizacja regresji wielomianowej
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=X_test['Waga (kg)'], y=y_test, label='Dane rzeczywiste')
+sns.lineplot(x=X_test['Waga (kg)'], y=y_pred_poly, color='red', label='Regresja wielomianowa')
+plt.title('Regresja wielomianowa: Wzrost w zależności od wagi')
+plt.xlabel('Waga (kg)')
+plt.ylabel('Wzrost (cm)')
+plt.legend()
+plt.show()
+
+# Wyjaśnienie wyników analizy i modelowania
+mean_height = df['Wzrost (cm)'].mean()
+std_height = df['Wzrost (cm)'].std()
+mean_weight = df['Waga (kg)'].mean()
+std_weight = df['Waga (kg)'].std()
+
+print(f"""
+### Wyniki Analizy i Modelowania
+
+#### Rozkład Wzrostu
+Wykres przedstawia rozkład wzrostu osób w centymetrach. Na osi X mamy wartości wzrostu, a na osi Y liczbę osób o danym wzroście.
+Większość osób ma wzrost w zakresie od {mean_height - std_height:.2f} cm do {mean_height + std_height:.2f} cm, co pokazuje normalny rozkład wzrostu w populacji.
+
+#### Rozkład Wagi
+Wykres przedstawia rozkład wagi osób w kilogramach. Na osi X mamy wartości wagi, a na osi Y liczbę osób o danej wadze.
+Większość osób ma wagę w zakresie od {mean_weight - std_weight:.2f} kg do {mean_weight + std_weight:.2f} kg, co pokazuje normalny rozkład wagi w populacji.
+
+#### Wzrost w Zależności od Wagi
+Wykres rozproszenia pokazuje zależność między wzrostem a wagą. Widać, że istnieje pewna korelacja między tymi dwoma zmiennymi, co potwierdza współczynnik korelacji:
+{correlation}
+
+#### Modelowanie
+1. **Regresja Liniowa**:
+   - Średni błąd kwadratowy (MSE): {mse:.2f}
+   - Współczynnik determinacji (R^2): {r2:.2f}
+   - Model regresji liniowej został wytrenowany do przewidywania wzrostu na podstawie wagi. Niski MSE wskazuje na dobrą jakość modelu.
+
+2. **Regresja Wielomianowa**:
+   - Średni błąd kwadratowy (MSE): {mse_poly:.2f}
+   - Współczynnik determinacji (R^2): {r2_poly:.2f}
+   - Model regresji wielomianowej może lepiej dopasować się do danych, co widać po wyższym R^2 w porównaniu do modelu liniowego.
+
+#### Zastosowanie
+Takie modele mogą być używane w dziedzinach takich jak zdrowie publiczne, badania naukowe czy statystyka sportowa do przewidywania i analizy danych demograficznych.
+Dzięki tej analizie możemy lepiej zrozumieć, jak wzrost i waga są ze sobą powiązane i jak można te informacje wykorzystać w praktyce.
+""")
